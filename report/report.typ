@@ -32,7 +32,6 @@
 
 #set heading(numbering: project-heading-numbering)
 
-#heading(level: 1, numbering: none)[Introduction]
 
 = Direct problem 
 
@@ -146,7 +145,7 @@ known intensities $alpha_i = 250000$ for all $i$. The direct simulation gives
 $min T_h = 343 K$, $max T_h = 507.137 K$, and $overline(T_h)_S = 422.015 K$.
 
 #figure(
-  image("figures/direct.png", width: 100%),
+  image("figures/direct.png", width: 80%),
   caption: [Stationary temperature distribution for the direct problem, with the cooking region $S$ outlined. Warmer colors indicate higher temperature.],
 )
 
@@ -259,7 +258,7 @@ $A^h alpha^h = b^h$, solves it, and finally performs a direct simulation with
 the resulting source term.
 
 #figure(
-  image("figures/opti_initial.png", width: 100%),
+  image("figures/opti_initial.png", width: 80%),
   caption: [Optimized temperature distribution.],
 )
 
@@ -323,6 +322,10 @@ $alpha^* = 5 times 10^5$. The candidate grid is
 $29 times 19$ points in $[-1.4, 1.4] times [-0.9, 0.9]$; this grid contains the
 true center.
 
+#figure(
+  image("figures/inverse.png", width: 80%),
+  caption: [Temperature distirbution with unknown source and recovered center drawn in blue.],
+)
 Using the temperature on the left and right walls, the algorithm returns
 $z = (0.4, -0.3)$, $alpha = 5 times 10^5$, with relative residual $0$. Using
 $partial_n T$ on the top wall, it also returns $z = (0.4, -0.3)$ and
@@ -338,10 +341,9 @@ before it is observed at the boundary. If the true source is not on the grid,
 the same method identifies the nearest candidate response; refining the grid
 then improves the location estimate.
 
-#heading(level: 1, numbering: none)[Conclusion]
 
 #heading(level: 1, numbering: none)[Appendix] <app-linear-independence>
-== Linear independence of the temperature responses
+#heading(level: 2, numbering: none)[Linear independence of the temperature responses]
 
 We prove #footnote[Please note that this proof was not AI-generated. One of the authors has studied complex and harmonic analysis previously and was more than happy to apply it to this context :)]  that $T_1|_S, dots, T_6|_S$ are linearly independent in $L^2(S)$ for
 the project geometry. The source disks are outside $S$, their closures are
@@ -381,10 +383,10 @@ $
 Since $abs(C_i) > 0$, we get $beta_i = 0$. Thus the restrictions $T_i|_S$ are linearly
 independent in $L^2(S)$.
 
-Please note that the circular shape is not essential. This proofs works for any finite family
+Note that the circular shape is not essential. This proofs works for any finite family
 of pairwise disjoint Lipschitz open source regions of positive measure,
 compactly contained in $Omega minus overline(S)$, provided
 $Omega minus (overline(S) union union_i overline(C_i))$ is connected.
 
 
-#bibliography("references.bib", style: "ieee", title: [References])
+// #bibliography("references.bib", style: "ieee", title: [References])
