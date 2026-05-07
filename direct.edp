@@ -10,6 +10,7 @@ int top = 3;
 int nSources = 6;
 int nx = 120;
 int ny = 80;
+real alpha0 = 250000.0;
 
 mesh Th = square(nx, ny, [3.0*x - 1.5, 2.0*y - 1.0]);
 mesh Sh = square(1, 1, [1.5*x - 0.75, y - 0.5]);
@@ -18,8 +19,7 @@ fespace Vh(Th, P1);
 func inS = ((abs(x) < 0.75) && (abs(y) < 0.5)) ? 1.0 : 0.0;
 func kappa = inS ? 1.0 : 10.0;
 
-real[int] alpha(nSources), cx(nSources), cy(nSources);
-alpha = [250000.0, 250000.0, 250000.0, 250000.0, 250000.0, 250000.0];
+real[int] cx(nSources), cy(nSources);
 cx = [-1.0, 0.0, 1.0, -1.0, 0.0, 1.0];
 cy = [-0.75, -0.75, -0.75, 0.75, 0.75, 0.75];
 
@@ -29,7 +29,7 @@ f = 0.0;
 for (int i = 0; i < nSources; ++i) {
     real xi = cx[i];
     real yi = cy[i];
-    f = f + alpha[i]*((((x - xi)^2 + (y - yi)^2) < rC^2) ? 1.0 : 0.0);
+    f = f + alpha0*((((x - xi)^2 + (y - yi)^2) < rC^2) ? 1.0 : 0.0);
 }
 
 problem direct(T, v)
