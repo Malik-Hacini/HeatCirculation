@@ -1,0 +1,137 @@
+verbosity = 0;
+
+real Tc = 343.0;
+real Te = 293.0;
+real h = 1.0;
+real rC = 0.05;
+
+int bottom = 1;
+int right = 2;
+int top = 3;
+int left = 4;
+int nx = 90;
+int ny = 60;
+
+real trueX = 0.4;
+real trueY = -0.3;
+real trueAlpha = 500000.0;
+
+mesh Th = square(nx, ny, [3.0*x - 1.5, 2.0*y - 1.0]);
+fespace Vh(Th, P1);
+
+func inS = ((abs(x) < 0.75) && (abs(y) < 0.5)) ? 1.0 : 0.0;
+func kappa = inS ? 1.0 : 10.0;
+
+Vh T, U, v, T0, Uobs, Ucand, Tmeas, sourceH;
+
+problem background(T, v)
+    = int2d(Th)(kappa*(dx(T)*dx(v) + dy(T)*dy(v)))
+    + int1d(Th, bottom)(kappa*h*T*v)
+    - int1d(Th, bottom)(kappa*h*Te*v)
+    + on(top, T = Tc);
+
+varf anomalyMatrix(U, v)
+    = int2d(Th)(kappa*(dx(U)*dx(v) + dy(U)*dy(v)))
+    + int1d(Th, bottom)(kappa*h*U*v)
+    + on(top, U = 0.0);
+
+varf anomalyRhs(U, v) = int2d(Th)(sourceH*v);
+
+matrix anomalyA = anomalyMatrix(Vh, Vh);
+set(anomalyA, solver = sparsesolver);
+real[int] rhs(Vh.ndof);
+
+background;
+T0 = T;
+
+sourceH = trueAlpha*(((x - trueX)^2 + (y - trueY)^2 < rC^2) ? 1.0 : 0.0);
+rhs = anomalyRhs(0, Vh);
+U[] = anomalyA^-1 * rhs;
+Uobs = U;
+Tmeas = T0 + Uobs;
+
+real obsWallsNorm = int1d(Th, left, right)(Uobs^2);
+real obsTopNorm = int1d(Th, top)((dx(Uobs)*N.x + dy(Uobs)*N.y)^2);
+
+real bestWallsResidual = 1.0e100;
+real bestWallsX = 0.0;
+real bestWallsY = 0.0;
+real bestWallsAlpha = 0.0;
+
+real bestTopResidual = 1.0e100;
+real bestTopX = 0.0;
+real bestTopY = 0.0;
+real bestTopAlpha = 0.0;
+
+int nGridX = 29;
+int nGridY = 19;
+real xMin = -1.4;
+real xMax = 1.4;
+real yMin = -0.9;
+real yMax = 0.9;
+
+for (int ix = 0; ix < nGridX; ++ix) {
+    real xc = xMin + (xMax - xMin)*ix/(nGridX - 1);
+    for (int iy = 0; iy < nGridY; ++iy) {
+        real yc = yMin + (yMax - yMin)*iy/(nGridY - 1);
+
+        sourceH = (((x - xc)^2 + (y - yc)^2 < rC^2) ? 1.0 : 0.0);
+        rhs = anomalyRhs(0, Vh);
+        U[] = anomalyA^-1 * rhs;
+        Ucand = U;
+
+        real candWallsNorm = int1d(Th, left, right)(Ucand^2);
+        real ipWalls = int1d(Th, left, right)(Uobs*Ucand);
+        real alphaWalls = ipWalls/candWallsNorm;
+        real resWalls2 = obsWallsNorm - ipWalls*ipWalls/candWallsNorm;
+        if (resWalls2 < 0.0) {
+            resWalls2 = 0.0;
+        }
+        real relWalls = sqrt(resWalls2/obsWallsNorm);
+
+        if (relWalls < bestWallsResidual) {
+            bestWallsResidual = relWalls;
+            bestWallsX = xc;
+            bestWallsY = yc;
+            bestWallsAlpha = alphaWalls;
+        }
+
+        real candTopNorm = int1d(Th, top)((dx(Ucand)*N.x + dy(Ucand)*N.y)^2);
+        real ipTop = int1d(Th, top)((dx(Uobs)*N.x + dy(Uobs)*N.y)*(dx(Ucand)*N.x + dy(Ucand)*N.y));
+        real alphaTop = ipTop/candTopNorm;
+        real resTop2 = obsTopNorm - ipTop*ipTop/candTopNorm;
+        if (resTop2 < 0.0) {
+            resTop2 = 0.0;
+        }
+        real relTop = sqrt(resTop2/obsTopNorm);
+
+        if (relTop < bestTopResidual) {
+            bestTopResidual = relTop;
+            bestTopX = xc;
+            bestTopY = yc;
+            bestTopAlpha = alphaTop;
+        }
+    }
+}
+
+cout << "True source: x = " << trueX << ", y = " << trueY
+     << ", alpha = " << trueAlpha << endl;
+
+cout << "Detection from T on left/right walls:" << endl;
+cout << "x = " << bestWallsX << ", y = " << bestWallsY
+     << ", alpha = " << bestWallsAlpha
+     << ", relative residual = " << bestWallsResidual << endl;
+
+cout << "Detection from normal derivative on top wall:" << endl;
+cout << "x = " << bestTopX << ", y = " << bestTopY
+     << ", alpha = " << bestTopAlpha
+     << ", relative residual = " << bestTopResidual << endl;
+
+border recoveredWalls(t = 0.0, 2.0*pi) { x = bestWallsX + rC*cos(t); y = bestWallsY + rC*sin(t); label = 10; };
+border recoveredTop(t = 0.0, 2.0*pi) { x = bestTopX + rC*cos(t); y = bestTopY + rC*sin(t); label = 11; };
+mesh ChWalls = buildmesh(recoveredWalls(80));
+mesh ChTop = buildmesh(recoveredTop(80));
+
+plot(Tmeas, cmm = "Measured temperature with anomaly", wait = true, value = true, fill = true);
+plot(Tmeas, ChWalls, cmm = "Measured temperature; circle = recovery from T on walls", wait = true, value = true, fill = true);
+plot(Tmeas, ChTop, cmm = "Measured temperature; circle = recovery from top normal derivative", wait = true, value = true, fill = true);

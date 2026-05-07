@@ -35,37 +35,138 @@
 #heading(level: 1, numbering: none)[Introduction]
 
 = Direct problem 
+
+== Variational formulation
+
+Let $Gamma_t$ be the top wall, $Gamma_b$ the bottom door, and $Gamma_l$,
+$Gamma_r$ the lateral walls. We fix the source intensities
+$alpha = (alpha_1, dots, alpha_6)$ and set $f = sum_(i=1)^6 alpha_i 1_(C_i)$.
+Since the $C_i$ have finite measure, $f in L^2(Omega)$. The strong problem is
+$
+cases(
+  -op("div")(kappa nabla T) = f & "in" Omega,
+  T = T_c & "on" Gamma_t,
+  partial_n T = 0 & "on" Gamma_l union Gamma_r,
+  partial_n T + h(T - T_e) = 0 & "on" Gamma_b,
+)
+$
+
+Following the course treatment of mixed boundary value problems, the Dirichlet
+condition is put in the space. Let
+$V = { v in H^1(Omega) | gamma_0 v = 0 " on " Gamma_t }$ and
+$K = { w in H^1(Omega) | gamma_0 w = T_c " on " Gamma_t }$.
+
+Assume first that $T$ is regular. For $v in V$, multiply the equation by $v$ and
+integrate over $Omega$:
+$
+integral_Omega f v dif x = integral_Omega -op("div")(kappa nabla T) v dif x.
+$
+Green's formula gives
+$
+integral_Omega -op("div")(kappa nabla T) v dif x
+  = integral_Omega kappa nabla T dot nabla v dif x
+    - integral_(partial Omega) kappa partial_n T v dif s.
+$
+We now split the boundary term. On $Gamma_t$, $v = 0$ by definition of $V$. On
+$Gamma_l union Gamma_r$, the walls are insulated, so $partial_n T = 0$. On
+$Gamma_b$, the Robin condition gives $partial_n T = -h(T - T_e)$, hence
+$-kappa partial_n T v = kappa h T v - kappa h T_e v$. Therefore
+$
+integral_Omega kappa nabla T dot nabla v dif x
+  + integral_(Gamma_b) kappa h T v dif s
+  = integral_Omega f v dif x + integral_(Gamma_b) kappa h T_e v dif s.
+$
+This identity only involves first derivatives of $T$ and is the weak formulation. For $u, v in H^1(Omega)$, define
+$
+a(u, v) = integral_Omega kappa nabla u dot nabla v dif x
+  + integral_(Gamma_b) kappa h u v dif s.
+$
+The weak problem is thus: find $T in K$ such that, for all $v in V$,
+$
+a(T, v) = integral_Omega f v dif x + integral_(Gamma_b) kappa h T_e v dif s.
+$
+
+We cannot directly apply Lax-Milgram on $K$ because $K$ is affine, not vectorial.
+Choose any lifting $G in H^1(Omega)$ such that $gamma_0 G = T_c$ on $Gamma_t$;
+for instance the constant function $G = T_c$. We write $T = U + G$, where
+$U in V$. Then $T$ solves the weak problem if and only if $U in V$ satisfies
+$a(U, v) = ell(v)$ for all $v in V$, with
+$
+ell(v) = integral_Omega f v dif x + integral_(Gamma_b) kappa h T_e v dif s - a(G, v).
+$
+The term $a(G, v)$ is simply the contribution of the lifting of the non-homogeneous
+Dirichlet condition. It appears when replacing $T$ by $U + G$ in $a(T, v)$.
+
+The space $V$ is a closed subspace of $H^1(Omega)$, hence a Hilbert space for the
+$H^1$ norm.
+We now check the three assumptions of the Lax-Milgram theorem. 
+
+ First,
+$a$ is continuous on $V times V$. Indeed, $kappa in L^infinity(Omega)$ and the
+trace theorem gives $norm(gamma_0 v)_(L^2(Gamma_b)) <= C norm(v)_(H^1(Omega))$.
+Thus there is $M > 0$ such that
+$abs(a(u, v)) <= M norm(u)_(H^1(Omega)) norm(v)_(H^1(Omega))$.
+
+Second, $a$ is coercive on $V$. Since $kappa >= 1$,
+$a(v, v) >= norm(nabla v)_(L^2(Omega))^2$. By the Poincare inequality on the
+space of functions with zero trace on $Gamma_t$, there exists $C_P > 0$ such that
+$norm(v)_(H^1(Omega)) <= C_P norm(nabla v)_(L^2(Omega))$. Hence
+$a(v, v) >= C_P^(-2) norm(v)_(H^1(Omega))^2$.
+
+Third, $ell$ is continuous on $V$. The volume term is controlled by Cauchy-Schwarz,
+the boundary term by the trace theorem, and the lifting term by the continuity of
+$a$.
+
+By
+Lax-Milgram, there is a unique $U in V$, hence a unique weak solution
+$T = U + G in K$.
+
+== P1 finite element approximation
+
+Let $cal(T)_h$ be a triangulation of $Omega$. The $P_1$ finite element space is
+$
+V_h = { v_h in C^0(overline(Omega)) | v_h|_K " is affine for all " K in cal(T)_h,
+  v_h = 0 " on " Gamma_t }.
+$
+With $G_h = T_c$, we look for $T_h = U_h + G_h$ with $U_h in V_h$ such that
+$a(U_h, v_h) = ell(v_h)$ for all $v_h in V_h$.
+
+Let $(phi_1, dots, phi_N)$ be the usual nodal basis of $V_h$. Writing
+$U_h = sum_(j=1)^N U_j phi_j$ and testing with each $phi_i$ gives the linear
+system $A_h U = F_h$, with $(A_h)_(i j) = a(phi_j, phi_i)$ and
+$(F_h)_i = ell(phi_i)$. The matrix is sparse because each hat function has local
+support. By applying Lax-Milgram on the finite-dimensional Hilbert space $V_h$,
+this discrete problem has a unique solution.
+
+== Stationary simulation
+
+The script `direct.edp` implements the $P_1$ method for the stationary direct
+problem. For the test run, we used the prescribed six source locations and the
+known intensities $alpha_i = 250000$ for all $i$. The direct simulation gives
+$min T_h = 343 K$, $max T_h = 507.137 K$, and $overline(T_h)_S = 422.015 K$.
+The plot shows hot spots around the resistors and a non-uniform temperature in
+$S$, which motivates the optimization problem of Part 2.
+
+== Warm-up phase
+
+To describe the warm-up, we add the time derivative and consider
+$partial_t T - op("div")(kappa nabla T) = f$ in $Omega times ]0, T_f[$, with the
+same boundary conditions as before. We use the following implicit Euler scheme: given $T_h^n$, find $T_h^(n+1) in G_h + V_h$ such that, for all
+$v_h in V_h$,
+$
+integral_Omega (T_h^(n+1) v_h) / delta t dif x + a(T_h^(n+1), v_h)
+  = integral_Omega (T_h^n v_h) / delta t dif x
+    + integral_Omega f v_h dif x
+    + integral_(Gamma_b) kappa h T_e v_h dif s.
+$
+The script `warmup.edp` implements this scheme with $T_h^0 = T_e$, over $200$
+time steps on the interval $[0, 1.25]$. With the same source intensities as in
+`direct.edp`, the mean temperature in $S$ goes from $295.491 K$ at
+$t = 0.00625$ to $421.986 K$ at $t = 1$, and reaches $422.012 K$ at $t = 1.25$.
+This is consistent with the convergence of the parabolic problem toward the
+stationary direct solution.
+
 = Optimization problem
-
-We use the same notation as in the statement. The oven is
-$Omega = ] -1.5, 1.5 [ times ] -1, 1 [$, the cooking region is
-$S = ] -0.75, 0.75 [ times ] -0.5, 0.5 [$, and the six sources are the disks
-$C_i$ of radius $0.05$ centered at the prescribed points. We write
-$Gamma_t$ for the top wall, $Gamma_b$ for the bottom door, and $Gamma_l$,
-$Gamma_r$ for the left and right walls. The coefficient is
-$kappa = 1$ in $S$ and $kappa = 10$ in $Omega minus S$.
-The constants are $T_c = 343 K$ and $T_e = 293 K$: $T_c$ is the imposed
-temperature on the top wall, while $T_e$ is the exterior air temperature in the
-Robin law on the bottom door.
-
-The top boundary condition is Dirichlet, so the natural affine space for the
-temperature is
-$ K = { w in H^1(Omega) | w = T_c " on " Gamma_t } $
-and the test space is
-$ V = { v in H^1(Omega) | v = 0 " on " Gamma_t } . $
-For $u in H^1(Omega)$ and $v in V$, define
-$
-a(u, v)
-  = integral_Omega kappa nabla u dot nabla v dif x
-    + integral_(Gamma_b) kappa h u v dif s.
-$
-The bottom condition is the one written in the worksheet,
-$partial_n T + h(T - T_e) = 0$. Therefore, after applying Green's formula to
-$-op("div")(kappa nabla T)$, the Robin contribution is
-$integral_(Gamma_b) kappa h T v dif s$ on the left-hand side and
-$integral_(Gamma_b) kappa h T_e v dif s$ on the right-hand side. The lateral
-insulation conditions are homogeneous Neumann conditions and therefore produce
-no boundary term.
 
 == Linear decomposition of the solution
 
@@ -86,7 +187,6 @@ $
 
 $T_0$ is the temperature when all resistors are switched
 off, depending only on the effect of the external temperature $T_e$ on the boundary, and $T_i$ is the temperature when only the resistor $i$ is on.
-#pagebreak()
 Let:
 $ T^*(alpha) = T_0 + sum_(i=1)^6 alpha_i T_i. 
 $
@@ -145,7 +245,7 @@ a unique solution.
 
 == Simulation results
 
-The script `Project/optimization.edp` implements the previous construction with
+The script `optimization.edp` implements the previous construction with
 $P_1$ finite elements. It computes $T_0$,
 then the six functions $T_i$, assembles the discrete normal system
 $A^h alpha^h = b^h$, solves it, and finally performs a direct simulation with
@@ -174,6 +274,62 @@ bottom sources remain cooler than the top ones.
 
 == Source optimization
 = Inverse problem 
+
+== Detection method
+
+We assume that the normal operating state of the oven is known. Thus, from a
+measured temperature $T_m$, we first subtract the no-anomaly background $T_0$.
+The anomaly $U = T_m - T_0$ satisfies the same homogeneous boundary conditions
+as the responses $T_i$ from the optimization part, but with one unknown source
+$alpha 1_(C(z))$, where $z$ is the unknown center.
+
+For a candidate center $z$, let $u_z$ be the solution with unit intensity:
+$
+a(u_z, v) = integral_(C(z)) v dif x quad "for all" v in V.
+$
+If $B_M$ denotes the measurement operator, the predicted measurement is
+$alpha B_M u_z$. We use two choices: $B_M w = w$ on $Gamma_l union Gamma_r$,
+which corresponds to measuring the temperature on the vertical walls, and
+$B_M w = partial_n w$ on $Gamma_t$, which corresponds to measuring the normal
+derivative on the top wall.
+
+For each candidate $z$, the best intensity is obtained explicitly by a one
+dimensional least-squares fit:
+$
+alpha(z) = ((d_M, B_M u_z)_M) / ((B_M u_z, B_M u_z)_M),
+$
+where $d_M = B_M (T_m - T_0)$ and $(dot, dot)_M$ is the $L^2$ product on the
+measured boundary. The remaining relative residual is
+$
+r(z) = sqrt(((d_M - alpha(z) B_M u_z, d_M - alpha(z) B_M u_z)_M) / ((d_M, d_M)_M)).
+$
+The numerical inverse problem is then reduced to a finite search over candidate
+centers: choose the $z$ minimizing $r(z)$, and take $alpha(z)$ as the recovered
+intensity. This is the cleanest approach here because only the source position
+is searched nonlinearly; the intensity is eliminated analytically.
+
+== Numerical results
+
+The script `inverse.edp` implements this dictionary search. We generated a
+synthetic anomaly with center $z^* = (0.4, -0.3)$, radius $0.05$, and intensity
+$alpha^* = 5 times 10^5$. The candidate grid is
+$29 times 19$ points in $[-1.4, 1.4] times [-0.9, 0.9]$; this grid contains the
+true center.
+
+Using the temperature on the left and right walls, the algorithm returns
+$z = (0.4, -0.3)$, $alpha = 5 times 10^5$, with relative residual $0$. Using
+$partial_n T$ on the top wall, it also returns $z = (0.4, -0.3)$ and
+$alpha = 5 times 10^5$, with relative residual $1.39 times 10^(-8)$. The small
+non-zero residual in the second case comes from the finite element evaluation of
+the boundary normal derivative.
+
+These results confirm that, in the noiseless synthetic setting, both proposed
+measurement types are sufficient to detect the anomaly when the candidate grid
+contains the true source. In practice, the inverse problem remains sensitive to
+noise and to the grid resolution because the heat equation smooths the source
+before it is observed at the boundary. If the true source is not on the grid,
+the same method identifies the nearest candidate response; refining the grid
+then improves the location estimate.
 
 #heading(level: 1, numbering: none)[Conclusion]
 

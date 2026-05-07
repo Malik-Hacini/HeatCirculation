@@ -1,0 +1,51 @@
+verbosity = 0;
+
+real Tc = 343.0;
+real Te = 293.0;
+real h = 1.0;
+real rC = 0.05;
+
+int bottom = 1;
+int top = 3;
+int nSources = 6;
+int nx = 120;
+int ny = 80;
+
+mesh Th = square(nx, ny, [3.0*x - 1.5, 2.0*y - 1.0]);
+mesh Sh = square(1, 1, [1.5*x - 0.75, y - 0.5]);
+fespace Vh(Th, P1);
+
+func inS = ((abs(x) < 0.75) && (abs(y) < 0.5)) ? 1.0 : 0.0;
+func kappa = inS ? 1.0 : 10.0;
+
+real[int] alpha(nSources), cx(nSources), cy(nSources);
+alpha = [250000.0, 250000.0, 250000.0, 250000.0, 250000.0, 250000.0];
+cx = [-1.0, 0.0, 1.0, -1.0, 0.0, 1.0];
+cy = [-0.75, -0.75, -0.75, 0.75, 0.75, 0.75];
+
+Vh T, v, f;
+
+f = 0.0;
+for (int i = 0; i < nSources; ++i) {
+    real xi = cx[i];
+    real yi = cy[i];
+    f = f + alpha[i]*((((x - xi)^2 + (y - yi)^2) < rC^2) ? 1.0 : 0.0);
+}
+
+problem direct(T, v)
+    = int2d(Th)(kappa*(dx(T)*dx(v) + dy(T)*dy(v)))
+    + int1d(Th, bottom)(kappa*h*T*v)
+    - int2d(Th)(f*v)
+    - int1d(Th, bottom)(kappa*h*Te*v)
+    + on(top, T = Tc);
+
+direct;
+
+real areaS = int2d(Th)(inS);
+real meanS = int2d(Th)(inS*T)/areaS;
+
+cout << "min temperature = " << T[].min << endl;
+cout << "max temperature = " << T[].max << endl;
+cout << "mean temperature on S = " << meanS << endl;
+
+plot(T, Sh, cmm = "Direct temperature; rectangle = S", wait = true, value = true, fill = true);
