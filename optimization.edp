@@ -1,0 +1,96 @@
+verbosity = 0;
+
+real Tc = 343.0;
+real Te = 293.0;
+real h = 1.0;
+real Ts = 400.0;
+real rC = 0.05;
+
+int bottom = 1;
+int top = 3;
+int nSources = 6;
+int nx = 120;
+int ny = 80;
+
+mesh Th = square(nx, ny, [3.0*x - 1.5, 2.0*y - 1.0]);
+mesh Sh = square(1, 1, [1.5*x - 0.75, y - 0.5]);
+fespace Vh(Th, P1);
+
+func inS = ((abs(x) < 0.75) && (abs(y) < 0.5)) ? 1.0 : 0.0;
+func kappa = inS ? 1.0 : 10.0;
+
+real[int] cx(nSources), cy(nSources);
+cx = [-1.0, 0.0, 1.0, -1.0, 0.0, 1.0];
+cy = [-0.75, -0.75, -0.75, 0.75, 0.75, 0.75];
+
+Vh T, v, T0, Topt, errPlot, sourceH;
+Vh[int] Ti(nSources);
+
+problem oven0(T, v)
+    = int2d(Th)(kappa*(dx(T)*dx(v) + dy(T)*dy(v)))
+    + int1d(Th, bottom)(kappa*h*T*v)
+    - int1d(Th, bottom)(kappa*h*Te*v)
+    + on(top, T = Tc);
+
+problem ovenSource(T, v)
+    = int2d(Th)(kappa*(dx(T)*dx(v) + dy(T)*dy(v)))
+    + int1d(Th, bottom)(kappa*h*T*v)
+    - int2d(Th)(sourceH*v)
+    + on(top, T = 0.0);
+
+problem ovenDirect(T, v)
+    = int2d(Th)(kappa*(dx(T)*dx(v) + dy(T)*dy(v)))
+    + int1d(Th, bottom)(kappa*h*T*v)
+    - int2d(Th)(sourceH*v)
+    - int1d(Th, bottom)(kappa*h*Te*v)
+    + on(top, T = Tc);
+
+oven0;
+T0 = T;
+
+for (int i = 0; i < nSources; ++i) {
+    real xi = cx[i];
+    real yi = cy[i];
+    sourceH = (((x - xi)^2 + (y - yi)^2) < rC^2) ? 1.0 : 0.0;
+    ovenSource;
+    Ti[i] = T;
+}
+
+matrix A(nSources, nSources);
+real[int] b(nSources), alpha(nSources);
+
+for (int i = 0; i < nSources; ++i) {
+    b[i] = int2d(Th)(inS*(Ts - T0)*Ti[i]);
+    for (int j = 0; j < nSources; ++j) {
+        A(i,j) = int2d(Th)(inS*Ti[i]*Ti[j]);
+    }
+}
+
+set(A, solver = sparsesolver);
+alpha = A^-1 * b;
+
+cout << "Optimal coefficients:" << endl;
+for (int i = 0; i < nSources; ++i) {
+    cout << "alpha[" << i + 1 << "] = " << alpha[i] << endl;
+}
+
+sourceH = 0.0;
+for (int i = 0; i < nSources; ++i) {
+    real xi = cx[i];
+    real yi = cy[i];
+    sourceH = sourceH + alpha[i]*((((x - xi)^2 + (y - yi)^2) < rC^2) ? 1.0 : 0.0);
+}
+
+ovenDirect;
+Topt = T;
+
+real areaS = int2d(Th)(inS);
+real meanS = int2d(Th)(inS*Topt) / areaS;
+real L2error = sqrt(int2d(Th)(inS*(Topt - Ts)^2));
+
+cout << "mean temperature on S = " << meanS << endl;
+cout << "L2 error on S = " << L2error << endl;
+
+errPlot = Topt - Ts;
+plot(Topt, Sh, cmm = "Optimal direct temperature; rectangle = S", wait = true, value = true, fill = true);
+plot(errPlot, Sh, cmm = "Topt - Ts; rectangle = S", wait = true, value = true, fill = true);
