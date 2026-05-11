@@ -308,9 +308,7 @@ $
 overline(T)_S &= 399.994 K quad "and "
 sqrt(1 / abs(S) integral_S abs(T - T_s)^2 dif x) &= 0.804 K.
 $
-For comparison, the initial six-source layout gave the same normalized error
-approximately equal to $2.49 K$. The proposed layout therefore reduces the error
-by about $68$ percent, while keeping all optimized source intensities positive thus physically feasible. We also observe the expected smoother distribution of intensities accross sources.
+For comparison, the initial six-source layout gave an error approximately equal to $2.49 K$. The proposed layout therefore reduces the error significantly while keeping all optimized source intensities positive thus physically feasible. We also observe the expected smoother distribution of intensities accross sources.
 
 #pagebreak()
 = Inverse problem 
