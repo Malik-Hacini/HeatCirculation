@@ -171,6 +171,7 @@ $t = 0.00625$ to $421.986 K$ at $t = 1$, and reaches $422.012 K$ at $t = 1.25$.
 This is consistent with the convergence of the parabolic problem toward the
 stationary direct solution.
 
+#pagebreak()
 = Optimization problem
 
 == Linear decomposition of the solution
@@ -209,7 +210,7 @@ $
 T(alpha, x) = T_0 (x) + sum_(i=1)^6 alpha_i T_i (x).
 $
 
-== Optimization problem
+== Linear formulation of the optimization problem
 Set $e_0(x) = T_0(x) - T_s$.  We have
 $
 J(alpha) = 1 / 2 integral_S abs(T(alpha, x) - T_s)^2 dif x = 1 / 2 integral_S abs(e_0 + sum_(j=1)^6 alpha_j T_j)^2 dif x.
@@ -279,6 +280,39 @@ bottom sources remain cooler than the top ones.
 
 
 == Source optimization
+
+We then tested different source layouts while keeping the same radius
+$r_C = 0.05$ and the same target temperature $T_s = 400 K$. The best tested
+configuration uses eight sources: five on the upper row and three on the lower
+row,
+$
+(-1, 0.75), (-0.5, 0.75), (0, 0.75), (0.5, 0.75), (1, 0.75)
+$
+and
+$
+(-1, -0.75), (0, -0.75), (1, -0.75).
+$
+We chose this distribution because the original optimization already required
+larger coefficients on the upper sources. Adding more sources on the upper side
+therefore gives finer control where it is most useful. We also keep symmetry
+with respect to $x = 0$, since the oven geometry, the cooking region, and the
+target temperature are symmetric in the horizontal direction.
+
+#figure(
+  image("figures/opti_source.png", width: 80%),
+  caption: [Optimized temperature distribution for the proposed eight-source layout.],
+)
+
+The script `optimized_sources.edp` gives
+$
+overline(T)_S &= 399.994 K quad "and "
+sqrt(1 / abs(S) integral_S abs(T - T_s)^2 dif x) &= 0.804 K.
+$
+For comparison, the initial six-source layout gave the same normalized error
+approximately equal to $2.49 K$. The proposed layout therefore reduces the error
+by about $68$ percent, while keeping all optimized source intensities positive thus physically feasible. We also observe the expected smoother distribution of intensities accross sources.
+
+#pagebreak()
 = Inverse problem 
 
 == Detection method
@@ -311,9 +345,9 @@ r(z) = sqrt(((d_M - alpha(z) B_M u_z, d_M - alpha(z) B_M u_z)_M) / ((d_M, d_M)_M
 $
 The numerical inverse problem is then reduced to a finite search over candidate
 centers: choose the $z$ minimizing $r(z)$, and take $alpha(z)$ as the recovered
-intensity. This is the cleanest approach here because only the source position
-is searched nonlinearly; the intensity is eliminated analytically.
+intensity. 
 
+#pagebreak()
 == Numerical results
 
 The script `inverse.edp` implements this dictionary search. We generated a
@@ -341,6 +375,7 @@ before it is observed at the boundary. If the true source is not on the grid,
 the same method identifies the nearest candidate response; refining the grid
 then improves the location estimate.
 
+#pagebreak()
 
 #heading(level: 1, numbering: none)[Appendix] <app-linear-independence>
 #heading(level: 2, numbering: none)[Linear independence of the temperature responses]
