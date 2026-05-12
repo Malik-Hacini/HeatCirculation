@@ -20,7 +20,7 @@
 // Metadata of the document
 //
 #let doc= (
-  title    : [*Heat circulation modelling : Oven case study*],
+  title    : [*Heat Circulation Modelling: Oven Case Study*],
   url      : "",
   logos: (
     tp_topleft  : image("assets/ensimag.png", width: 100pt),
