@@ -81,10 +81,10 @@ Topt = T;
 
 real areaS = int2d(Th)(inS);
 real meanS = int2d(Th)(inS*Topt) / areaS;
-real L2error = sqrt(int2d(Th)(inS*(Topt - Ts)^2));
+real normalizedError = sqrt(int2d(Th)(inS*(Topt - Ts)^2) / areaS);
 
 cout << "mean temperature on S = " << meanS << endl;
-cout << "L2 error on S = " << L2error << endl;
+cout << "normalized error on S = " << normalizedError << endl;
 
 errPlot = Topt - Ts;
 plot(Topt, Sh, cmm = "Optimal direct temperature; rectangle = S", wait = true, value = true, fill = true);
