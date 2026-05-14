@@ -254,7 +254,7 @@ a unique solution.
 
 == Simulation results
 
-The script `optimization.edp` implements the previous construction with
+The script `initial_optimized.edp` implements the previous construction with
 $P_1$ finite elements. It computes $T_0$,
 then the six functions $T_i$, assembles the discrete normal system
 $A^h alpha^h = b^h$, solves it, and finally performs a direct simulation with
@@ -281,7 +281,7 @@ bottom wall exchanges heat with an exterior temperature $T_e = 293 K$, so the
 bottom sources remain cooler than the top ones.
 
 
-== Source optimization
+== Source layout optimization
 
 We then tested different source layouts while keeping the same radius
 $r_C = 0.05$ and the same target temperature $T_s = 400 K$. The best tested
@@ -305,7 +305,7 @@ target temperature are symmetric in the horizontal direction.
   caption: [Optimized temperature distribution for the proposed eight-source layout.],
 )
 
-The script `optimized_sources.edp` gives
+The script `5t_3b_optimized.edp` gives
 $
 overline(T)_S &= 399.994 K quad "and "
 sqrt(1 / abs(S) integral_S abs(T - T_s)^2 dif x) &= 0.804 K.

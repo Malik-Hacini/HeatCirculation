@@ -1,0 +1,8 @@
+verbosity = 0;
+
+int nSources = 8;
+real[int] cx(nSources), cy(nSources);
+cx = [-1.0, -0.5, 0.0, 0.5, 1.0, -1.0, 0.0, 1.0];
+cy = [0.75, 0.75, 0.75, 0.75, 0.75, -0.75, -0.75, -0.75];
+
+include "core.idp"
