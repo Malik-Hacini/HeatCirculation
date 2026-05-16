@@ -25,7 +25,7 @@
   logos: (
     tp_topleft  : image("assets/ensimag.png", width: 100pt),
     tp_topright : image("assets/im2ag.png", width: 100pt),
-    tp_main     : none,
+    tp_main     : image("figures/direct.png"),
   ),
   authors: (
     (

@@ -386,7 +386,7 @@ then improves the location estimate.
 
 == Linear independence of the temperature responses
 
-We prove #footnote[Please note that this proof was not AI-generated. One of the authors has previously studied complex and harmonic analysis and was happy to apply it in this context.] that $T_1|_S, dots, T_6|_S$ are linearly independent in $L^2(S)$ for
+We prove #footnote[Please note that this proof   (and anything else in this report) was not AI-generated. One of the authors has previously studied complex and harmonic analysis and was pleased to apply it in this context.] that $T_1|_S, dots, T_6|_S$ are linearly independent in $L^2(S)$ for
 the project geometry. The source disks are outside $S$, their closures are
 pairwise disjoint, and none of them touches $partial S$. The coefficient
 $kappa$ is constant equal to $1$ in $S$ and constant equal to $10$ outside $S$.
