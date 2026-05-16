@@ -381,6 +381,7 @@ the same method identifies the nearest candidate response; refining the grid
 then improves the location estimate.
 
 #pagebreak()
+#counter(heading).update((0, 0))
 #heading(level: 1, numbering: none)[Appendix] <app-linear-independence>
 
 == Linear independence of the temperature responses
