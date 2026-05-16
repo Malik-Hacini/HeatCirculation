@@ -38,5 +38,5 @@ for (int n = 0; n < nTimeSteps; ++n) {
     real t = (n + 1)*dt;
     real meanS = int2d(Th)(inS*T)/areaS;
     cout << "t = " << t << ", mean temperature on S = " << meanS << endl;
-    plot(T, Sh, cmm = "Warm-up temperature, t = " + t, wait = false, value = true, fill = true);
+    plot(T, Sh, cmm = "Warm-up temperature, t = " + t, wait = (n == 0), value = true, fill = true);
 }
