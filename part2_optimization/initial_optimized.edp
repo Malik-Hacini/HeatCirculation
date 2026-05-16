@@ -1,8 +1,12 @@
 verbosity = 0;
 
+int nx = 120;
+int ny = 80;
+include "../core.idp"
+
 int nSources = 6;
 real[int] cx(nSources), cy(nSources);
 cx = [-1.0, 0.0, 1.0, -1.0, 0.0, 1.0];
 cy = [-0.75, -0.75, -0.75, 0.75, 0.75, 0.75];
 
-include "core.idp"
+include "core_optimization.idp"

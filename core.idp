@@ -1,0 +1,28 @@
+// Shared oven geometry, physical parameters, and P1 discretization.
+// Each script sets nx and ny before including this file.
+verbosity = 0;
+
+real Tc = 343.0;
+real Te = 293.0;
+real h = 1.0;
+real Ts = 400.0;
+real rC = 0.05;
+
+real ovenHalfWidth = 1.5;
+real ovenHalfHeight = 1.0;
+real cookHalfWidth = 0.75;
+real cookHalfHeight = 0.5;
+
+int bottom = 1;
+int right = 2;
+int top = 3;
+int left = 4;
+
+mesh Th = square(nx, ny, [2.0*ovenHalfWidth*x - ovenHalfWidth, 2.0*ovenHalfHeight*y - ovenHalfHeight]);
+mesh Sh = square(1, 1, [2.0*cookHalfWidth*x - cookHalfWidth, 2.0*cookHalfHeight*y - cookHalfHeight]);
+fespace Vh(Th, P1);
+
+func inS = ((abs(x) < cookHalfWidth) && (abs(y) < cookHalfHeight)) ? 1.0 : 0.0;
+func kappa = inS ? 1.0 : 10.0;
+
+real areaS = int2d(Th)(inS);
