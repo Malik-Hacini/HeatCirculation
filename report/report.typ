@@ -285,35 +285,40 @@ bottom sources remain cooler than the top ones.
 
 We then tested different source layouts while keeping the same radius
 $r_C = 0.05$ and the same target temperature $T_s = 400 K$. The best tested
-configuration uses eight sources: five on the upper row and three on the lower
+configuration uses eight sources: four on the upper row and four on the lower
 row,
 $
-(-1, 0.75), (-0.5, 0.75), (0, 0.75), (0.5, 0.75), (1, 0.75)
+(-1, 0.90), (-0.33, 0.90), (0.33, 0.90), (1, 0.90)
 $
 and
 $
-(-1, -0.75), (0, -0.75), (1, -0.75).
+(-1, -0.90), (-0.33, -0.90), (0.33, -0.90), (1, -0.90).
 $
-We chose this distribution because the original optimization already required
-larger coefficients on the upper sources. Adding more sources on the upper side
-therefore gives finer control where it is most useful. We also keep symmetry
-with respect to $x = 0$, since the oven geometry, the cooking region, and the
-target temperature are symmetric in the horizontal direction.
-
+We keep symmetry with respect to $x = 0$, since the oven geometry, the cooking
+region, and the target temperature are horizontally symmetric. The vertical
+boundary conditions are not symmetric: the top wall is fixed at the higher
+temperature $T_c$, while the bottom wall exchanges heat with the exterior at
+$T_e$. This creates a vertical bias in the optimized field; in our tests, the
+upper row is where the strongest boundary-induced variations appear. Using four
+top sources gives finer horizontal control of these gradients. Finally, moving
+both rows closer to the walls increases the distance between high-gradient zones (the source disks neighborhoods)
+and the cooking region $S$, smoothing the temperature inside $S$. 
 #figure(
-  image("figures/opti_source.png", width: 80%),
-  caption: [Optimized temperature distribution for the proposed eight-source layout.],
+  image("figures/opti_4_4.png", width: 80%),
+  caption: [Optimized temperature distribution for the proposed four-top four-bottom layout.],
 )
 
-The script `5t_3b_optimized.edp` gives
+The script `4t_4b_optimized.edp` gives
 $
-overline(T)_S &= 399.994 K quad "and "
-sqrt(1 / abs(S) integral_S abs(T - T_s)^2 dif x) &= 0.804 K.
+overline(T)_S &= 399.998 K quad "and "
+sqrt(1 / abs(S) integral_S abs(T - T_s)^2 dif x) &= 0.363 K.
 $
-For comparison, the initial six-source layout gave a normalized error of about
-$2.49 K$. The proposed layout therefore reduces the error by about $68$ percent,
+The proposed layout therefore reduces the error by about $85$ percent,
 while keeping all optimized source intensities positive and thus physically
 feasible. We also observe the expected smoother temperature distribution in $S$.
+Overall, increasing the number of sources is beneficial for the error, provided
+one remains careful not to use so many sources that the optimized coefficients
+become negative.
 
 #pagebreak()
 = Inverse problem
