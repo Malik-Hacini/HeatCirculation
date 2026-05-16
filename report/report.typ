@@ -136,8 +136,8 @@ system $A_h U = F_h$, with $(A_h)_(i j) = a(phi_j, phi_i)$ and
 $(F_h)_i = ell(phi_i)$. The matrix is sparse because each hat function has local
 support. By applying Lax-Milgram on the finite-dimensional Hilbert space $V_h$,
 this discrete problem has a unique solution.
-
 #pagebreak()
+
 == Stationary simulation
 
 The script `direct.edp` implements the $P_1$ method for the stationary direct
@@ -146,7 +146,7 @@ known intensities $alpha_i = 250000$ for all $i$. The direct simulation gives
 $min T_h = 343 K$, $max T_h = 507.137 K$, and $overline(T_h)_S = 422.015 K$.
 
 #figure(
-  image("figures/direct.png", width: 80%),
+  image("figures/direct.png", width: 60%),
   caption: [Stationary temperature distribution for the direct problem, with the cooking region $S$ outlined. Warmer colors indicate higher temperature.],
 )
 
@@ -261,7 +261,7 @@ $A^h alpha^h = b^h$, solves it, and finally performs a direct simulation with
 the resulting source term.
 
 #figure(
-  image("figures/opti_initial.png", width: 80%),
+  image("figures/opti_initial.png", width: 60%),
   caption: [Optimized temperature distribution.],
 )
 
@@ -304,7 +304,7 @@ top sources gives finer horizontal control of these gradients. Finally, moving
 both rows closer to the walls increases the distance between high-gradient zones (the source disks neighborhoods)
 and the cooking region $S$, smoothing the temperature inside $S$. 
 #figure(
-  image("figures/opti_4_4.png", width: 80%),
+  image("figures/opti_4_4.png", width: 60%),
   caption: [Optimized temperature distribution for the proposed four-top four-bottom layout.],
 )
 
@@ -320,7 +320,6 @@ Overall, increasing the number of sources is beneficial for the error, provided
 one remains careful not to use so many sources that the optimized coefficients
 become negative.
 
-#pagebreak()
 = Inverse problem
 
 == Detection method
@@ -341,15 +340,14 @@ which corresponds to measuring the temperature on the vertical walls, and
 $B_M w = partial_n w$ on $Gamma_t$, which corresponds to measuring the normal
 derivative on the top wall.
 
-For each candidate $z$, the best intensity is obtained explicitly by a
-one-dimensional least-squares fit:
+Let $chevron.l dot, dot chevron.r_M$ be the
+$L^2$ inner product on the measured boundary. For each candidate $z$, the best intensity $alpha(z)$ and relative residual $r(z)$ is obtained explicitly by projecting#footnote[This can be interpreted as a one dimensional least squares fit.]
+the measured anomaly data $d_M = B_M (T_m - T_0)$ onto the span of the predicted
+measurement $B_M u_z$:
 $
-alpha(z) = ((d_M, B_M u_z)_M) / ((B_M u_z, B_M u_z)_M),
-$
-where $d_M = B_M (T_m - T_0)$ and $(dot, dot)_M$ is the $L^2$ product on the
-measured boundary. The remaining relative residual is
-$
-r(z) = sqrt(((d_M - alpha(z) B_M u_z, d_M - alpha(z) B_M u_z)_M) / ((d_M, d_M)_M)).
+alpha(z) = (chevron.l d_M, B_M u_z chevron.r_M) / norm(B_M u_z)_M^2 quad "and" 
+r(z) = sqrt((chevron.l d_M - alpha(z) B_M u_z, d_M - alpha(z) B_M u_z chevron.r_M) / norm(d_M)_M^2).
+
 $
 The numerical inverse problem is then reduced to a finite search over candidate
 centers: choose the $z$ minimizing $r(z)$, and take $alpha(z)$ as the recovered
@@ -365,7 +363,7 @@ $29 times 19$ points in $[-1.4, 1.4] times [-0.9, 0.9]$; this grid contains the
 true center.
 
 #figure(
-  image("figures/inverse.png", width: 80%),
+  image("figures/inverse.png", width: 60%),
   caption: [Temperature distribution with unknown source and recovered center drawn in blue.],
 )
 Using the temperature on the left and right walls, the algorithm returns
@@ -375,18 +373,17 @@ $alpha = 5 times 10^5$, with relative residual $1.39 times 10^(-8)$. The small
 non-zero residual in the second case comes from the finite element evaluation of
 the boundary normal derivative.
 
-These results confirm that, in the noiseless synthetic setting, both proposed
-measurement types are sufficient to detect the anomaly when the candidate grid
-contains the true source. In practice, the inverse problem remains sensitive to
+These results confirm that both proposed
+measurement types are sufficient to detect the anomaly. In practice, the inverse problem remains sensitive to
 noise and to the grid resolution because the heat equation smooths the source
 before it is observed at the boundary. If the true source is not on the grid,
 the same method identifies the nearest candidate response; refining the grid
 then improves the location estimate.
 
 #pagebreak()
-
 #heading(level: 1, numbering: none)[Appendix] <app-linear-independence>
-#heading(level: 2, numbering: none)[Linear independence of the temperature responses]
+
+== Linear independence of the temperature responses
 
 We prove #footnote[Please note that this proof was not AI-generated. One of the authors has previously studied complex and harmonic analysis and was happy to apply it in this context.] that $T_1|_S, dots, T_6|_S$ are linearly independent in $L^2(S)$ for
 the project geometry. The source disks are outside $S$, their closures are
